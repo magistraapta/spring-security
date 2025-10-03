@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Welcome to Food Ordering</title>
+</head>
+<body>
+    
+<h1>Welcome to Food Ordering</h1>
+
+<div tf:authorize="isAuthenticated()" style="background-color: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px;">
+    <h3>User Information:</h3>
+    <p><strong>Full Name:</strong> <span th:text="${username}"></span></p>
+    <p><strong>Email:</strong> <span th:text="${email}"></span></p>
+    <p><strong>Username:</strong> <span th:text="${preferredUsername}"></span></p>
+</div>
+
+<div>
+    <a th:href="@{/private}">View Menu</a>
+</div>
+
+</body>
+</html>
