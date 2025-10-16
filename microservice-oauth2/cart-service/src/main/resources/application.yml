@@ -1,0 +1,13 @@
+server:
+    port: 8083
+
+spring:
+    application:
+        name: cart-service
+
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    issuer-uri: http://localhost:8080/realms/spring-oauth2
+                    jwk-set-uri: http://localhost:8080/realms/spring-oauth2/protocol/openid-connect/certs

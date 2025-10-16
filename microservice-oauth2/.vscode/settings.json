@@ -1,0 +1,7 @@
+{
+    "java.project.sourcePaths": [
+        "cart-service/src"
+    ],
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.compile.nullAnalysis.mode": "disabled"
+}

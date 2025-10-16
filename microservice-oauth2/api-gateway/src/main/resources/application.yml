@@ -1,0 +1,46 @@
+server:
+    port: 8081
+
+keycloak-client:
+    realm: spring-oauth2
+    issuer-uri: http://localhost:8080/realms/spring-oauth2
+    client-id: spring-client
+    client-secret: orLJcvhbOwE1GxxOeMcUUziVJ9yhW0VL
+    redirect-uri: http://localhost:8081/login/oauth2/code/keycloak
+    jwk-set-uri: http://localhost:8080/realms/spring-oauth2/protocol/openid-connect/certs
+
+spring:
+    application:
+        name: api-gateway
+
+    security:
+        oauth2:
+            client:
+                registration:
+                    keycloak:
+                        client-id: ${keycloak-client.client-id}
+                        client-secret: ${keycloak-client.client-secret}
+                        authorization-grant-type: authorization_code
+                        scope:
+                            - openid
+                            - profile
+                            - email
+                        provider: keycloak
+                        redirect-uri: ${keycloak-client.redirect-uri}
+                provider:
+                    keycloak:
+                        issuer-uri: ${keycloak-client.issuer-uri}
+                        jwk-set-uri: ${keycloak-client.jwk-set-uri}
+
+    cloud:
+        gateway:
+            server:
+                webflux:
+                    default-filters:
+                        - TokenRelay=
+                    routes:
+                        - id: cart-service
+                          uri: http://localhost:8083
+                          predicates:
+                            - Path=/cart/**
+
