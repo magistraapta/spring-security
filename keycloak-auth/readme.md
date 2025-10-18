@@ -1,208 +1,252 @@
-# Keycloak Authentication with Spring Boot
+# Keycloak Authentication Demo
 
-This project demonstrates how to integrate **Keycloak** (an open-source identity and access management solution) with a **Spring Boot** application using OAuth2/OpenID Connect for authentication.
+A Spring Boot application demonstrating OAuth2/OIDC authentication integration with Keycloak identity provider.
 
-## 🚀 Features
+## Overview
 
-- **OAuth2/OpenID Connect Integration** with Keycloak
-- **Spring Security** for authentication and authorization
-- **Thymeleaf** templates for web pages
-- **Docker Compose** for easy Keycloak setup
-- **User Information Display** showing logged-in user credentials
+This project showcases a Spring Boot application with Spring Security configured for OAuth2/OIDC authentication using Keycloak as the identity provider. It includes both public and protected endpoints with a web-based UI using Thymeleaf templates.
 
-## 🏗️ Project Structure
+## Features
+
+- **OAuth2/OIDC Integration**: Configured with Keycloak for authentication
+- **Spring Security**: OAuth2 client and resource server configuration
+- **Web UI**: Thymeleaf-based templates for user interface
+- **Public Endpoint**: Accessible without authentication (`/`)
+- **Protected Endpoint**: Requires authentication (`/private`)
+- **User Information Display**: Shows authenticated user details
+- **Proper Logout**: OIDC logout with redirect to Keycloak
+
+## Project Structure
 
 ```
 src/
 ├── main/
 │   ├── java/com/auth/keycloak_auth/
+│   │   ├── KeycloakAuthApplication.java    # Main Spring Boot application
 │   │   ├── config/
-│   │   │   └── SecurityConfig.java          # Spring Security configuration
-│   │   ├── controllers/
-│   │   │   └── AppController.java           # REST endpoints
-│   │   └── KeycloakAuthApplication.java     # Main application class
+│   │   │   └── SecurityConfig.java         # OAuth2 security configuration
+│   │   └── controllers/
+│   │       └── AppController.java          # Web controllers
 │   └── resources/
-│       ├── application.properties           # Application configuration
+│       ├── application.properties          # Application configuration
 │       └── templates/
-│           ├── home.html                    # Public home page
-│           └── menu.html                    # Protected menu page
-├── docker-compose.yml                       # Keycloak container setup
-└── pom.xml                                  # Maven dependencies
+│           ├── home.html                   # Public page template
+│           └── menu.html                   # Protected page template
+└── test/
+    └── java/com/auth/keycloak_auth/
+        └── KeycloakAuthApplicationTests.java # Test classes
 ```
 
-## 🛠️ Technologies Used
+## Configuration
 
-- **Java 17**
-- **Spring Boot 3.5.6**
-- **Spring Security 6.5.5**
-- **Thymeleaf** (template engine)
-- **Keycloak** (identity provider)
-- **Docker & Docker Compose**
-- **Maven** (build tool)
+### Security Configuration (`SecurityConfig.java`)
 
-## 📋 Prerequisites
-
-Before running this project, make sure you have:
-
-- **Java 17** or higher
-- **Maven 3.6+**
-- **Docker** and **Docker Compose**
-- **Git** (optional, for cloning)
-
-## 🚀 How to Run Locally
-
-### Step 1: Clone the Repository
-
-```bash
-git clone <your-repository-url>
-cd keycloak-auth
-```
-
-### Step 2: Start Keycloak
-
-Start the Keycloak server using Docker Compose:
-
-```bash
-docker compose up -d
-```
-
-This will start Keycloak on `http://localhost:8080` with the following default credentials:
-- **Admin Username**: `admin`
-- **Admin Password**: `admin`
-
-### Step 3: Configure Keycloak Client
-
-1. Open Keycloak Admin Console: `http://localhost:8080`
-2. Login with admin credentials
-3. Navigate to **Clients** → **Create**
-4. Create a new client with these settings:
-   - **Client ID**: `keycloak-test-client`
-   - **Client Protocol**: `openid-connect`
-   - **Root URL**: `http://localhost:8082`
-   - **Valid Redirect URIs**: `http://localhost:8082/login/oauth2/code/keycloak`
-   - **Web Origins**: `http://localhost:8082`
-5. Go to **Credentials** tab and copy the **Client Secret**
-6. Update `application.properties` with the client secret
-
-### Step 4: Update Configuration
-
-Edit `src/main/resources/application.properties` and update the client secret:
-
-```properties
-spring.security.oauth2.client.registration.keycloak.client-secret=YOUR_CLIENT_SECRET_HERE
-```
-
-### Step 5: Run the Spring Boot Application
-
-```bash
-mvn spring-boot:run
-```
-
-The application will start on `http://localhost:8082`
-
-## 🌐 Application Endpoints
-
-| Endpoint | Description | Authentication Required |
-|----------|-------------|------------------------|
-| `GET /` | Public home page | No |
-| `GET /private` | Protected menu page with user info | Yes |
-| `GET /oauth2/authorization/keycloak` | OAuth2 login redirect | No |
-
-## 🔐 Authentication Flow
-
-1. **User visits** `http://localhost:8082/private`
-2. **Spring Security** redirects to Keycloak login
-3. **User authenticates** with Keycloak credentials
-4. **Keycloak redirects back** to the application
-5. **Application displays** user information on the menu page
-
-## 👤 User Information Display
-
-When authenticated, the `/private` endpoint displays:
-- **Full Name** from Keycloak
-- **Email Address** from Keycloak
-- **Username** from Keycloak
-
-## 🐳 Docker Configuration
-
-The `docker-compose.yml` file sets up:
-- **Keycloak** on port 8080
-- **PostgreSQL** database for Keycloak
-- **Persistent volumes** for data storage
-
-## 🔧 Configuration Details
+The security configuration includes:
+- OAuth2 login with Keycloak
+- Public access to root endpoint (`/`)
+- Authentication required for all other endpoints
+- OIDC logout handler with proper redirect
+- Session invalidation on logout
 
 ### Application Properties
 
-```properties
-# Server Configuration
-server.port=8082
+- **Application Name**: `keycloak-auth`
+- **Server Port**: `8082`
+- **Keycloak Client ID**: `keycloak-test-client`
+- **Keycloak Realm**: `keycloak-test-realm`
+- **Keycloak Server**: `http://localhost:8080`
 
-# OAuth2 Client Configuration
-spring.security.oauth2.client.registration.keycloak.client-id=keycloak-test-client
-spring.security.oauth2.client.registration.keycloak.client-secret=YOUR_SECRET
-spring.security.oauth2.client.registration.keycloak.scope=openid,profile,email
-spring.security.oauth2.client.registration.keycloak.redirect-uri={baseUrl}/login/oauth2/code/{registrationId}
-spring.security.oauth2.client.registration.keycloak.authorization-grant-type=authorization_code
+### Keycloak Configuration
 
-# Keycloak Provider Configuration
-spring.security.oauth2.client.provider.keycloak.issuer-uri=http://localhost:8080/realms/master
+The application is configured to work with a Keycloak instance running on `localhost:8080` with:
+- **Realm**: `keycloak-test-realm`
+- **Client**: `keycloak-test-client`
+- **Scopes**: `openid`, `profile`, `email`
+
+## Prerequisites
+
+### Required Software
+
+- Java 17 or higher
+- Maven 3.6 or higher
+- Docker and Docker Compose (for Keycloak)
+
+### Keycloak Setup
+
+The project includes a `docker-compose.yml` file to run Keycloak locally:
+
+```yaml
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    command:
+      - start-dev
 ```
 
-### Security Configuration
+## Getting Started
 
-The `SecurityConfig.java` configures:
-- **OAuth2 Login** with Keycloak
-- **Public endpoints** (home page)
-- **Protected endpoints** (private pages)
-- **Logout functionality**
+### 1. Start Keycloak
 
-## 🧪 Testing the Application
+```bash
+cd keycloak-auth
+docker-compose up -d
+```
 
-1. **Visit the home page**: `http://localhost:8082`
-2. **Click "Login with Keycloak"** or visit `http://localhost:8082/private`
-3. **Login with Keycloak credentials**
-4. **View your user information** on the menu page
+Wait for Keycloak to start (usually takes 1-2 minutes).
 
-## 🛠️ Troubleshooting
+### 2. Configure Keycloak
+
+1. **Access Keycloak Admin Console**:
+   - Go to `http://localhost:8080`
+   - Login with `admin`/`admin`
+
+2. **Create a Realm**:
+   - Click "Create Realm"
+   - Name: `keycloak-test-realm`
+   - Click "Create"
+
+3. **Create a Client**:
+   - Go to "Clients" → "Create Client"
+   - Client ID: `keycloak-test-client`
+   - Client Protocol: `openid-connect`
+   - Root URL: `http://localhost:8082`
+   - Valid Redirect URIs: `http://localhost:8082/login/oauth2/code/keycloak`
+   - Valid Post Logout Redirect URIs: `http://localhost:8082`
+   - Click "Save"
+
+4. **Create a User**:
+   - Go to "Users" → "Create new user"
+   - Username: `testuser`
+   - Email: `test@example.com`
+   - First Name: `Test`
+   - Last Name: `User`
+   - Click "Save"
+   - Go to "Credentials" tab → "Set Password"
+   - Password: `password123`
+   - Temporary: OFF
+   - Click "Save"
+
+### 3. Run the Application
+
+```bash
+./mvnw spring-boot:run
+```
+
+Or on Windows:
+```bash
+mvnw.cmd spring-boot:run
+```
+
+### 4. Test the Application
+
+1. **Access the public endpoint**:
+   - Open your browser and go to `http://localhost:8082/`
+   - You should see the "Welcome to Food Ordering" page
+
+2. **Access the protected endpoint**:
+   - Click "View Menu" or go to `http://localhost:8082/private`
+   - You will be redirected to Keycloak login
+   - Login with the user you created (`testuser`/`password123`)
+   - After successful login, you'll see the menu page with user information
+
+## Endpoints
+
+| Endpoint | Method | Authentication Required | Description |
+|----------|--------|----------------------|-------------|
+| `/` | GET | No | Public page showing welcome message and user info (if logged in) |
+| `/private` | GET | Yes | Protected page showing menu and user information |
+
+## UI Features
+
+### Home Page (`/`)
+- Welcome message
+- User information display (when authenticated)
+- Link to protected menu page
+
+### Menu Page (`/private`)
+- Personalized welcome with username
+- User information display
+- Sample menu items
+- Logout button
+
+## Security Features Demonstrated
+
+- **OAuth2/OIDC Authentication**: Industry-standard authentication flow
+- **Authorization Code Grant**: Secure authorization flow
+- **Token Management**: Automatic token handling
+- **Session Management**: Proper session handling
+- **Logout Flow**: Complete logout with Keycloak integration
+- **User Information**: Access to user claims and attributes
+
+## Dependencies
+
+- **Spring Boot Starter OAuth2 Client**: OAuth2 client functionality
+- **Spring Boot Starter OAuth2 Resource Server**: Resource server capabilities
+- **Spring Boot Starter Security**: Core Spring Security functionality
+- **Spring Boot Starter Web**: Web application framework
+- **Spring Boot Starter Thymeleaf**: Template engine for web UI
+- **Spring Boot Starter Test**: Testing framework
+- **Spring Security Test**: Security testing utilities
+
+## Important Notes
+
+⚠️ **Security Considerations**:
+- This is a demo application and should not be used in production
+- Client secret is exposed in configuration (use environment variables in production)
+- Keycloak is running in development mode (not suitable for production)
+- Default admin credentials are used for Keycloak
+
+🔧 **Configuration Notes**:
+- The application runs on port `8082` to avoid conflicts with Keycloak (`8080`)
+- Debug logging is enabled for Spring Security and OAuth2
+- Client secret is hardcoded for demo purposes
+
+## Troubleshooting
 
 ### Common Issues
 
-1. **Port 8082 already in use**:
-   ```bash
-   lsof -ti:8082 | xargs kill
-   ```
+1. **Keycloak not accessible**:
+   - Ensure Docker is running
+   - Check if Keycloak container is up: `docker ps`
+   - Wait for Keycloak to fully start (check logs: `docker-compose logs`)
 
-2. **Keycloak realm not found**:
-   - Ensure Keycloak is running: `docker compose ps`
-   - Check the realm name in `application.properties`
+2. **Authentication fails**:
+   - Verify Keycloak realm and client configuration
+   - Check redirect URI matches exactly: `http://localhost:8082/login/oauth2/code/keycloak`
+   - Ensure user exists and password is set
 
-3. **Client not found in Keycloak**:
-   - Verify client ID and secret in `application.properties`
-   - Check redirect URI configuration in Keycloak
+3. **Port conflicts**:
+   - Change application port in `application.properties` if needed
+   - Update Keycloak client configuration accordingly
 
-### Debug Mode
+4. **Logout issues**:
+   - Verify post-logout redirect URI in Keycloak client settings
+   - Check that logout URL is: `http://localhost:8082`
 
-Enable debug logging by adding to `application.properties`:
-```properties
-logging.level.org.springframework.security=DEBUG
-logging.level.org.springframework.security.oauth2=DEBUG
-```
+### Logs
 
-## 📚 Additional Resources
+Check the console output for detailed logs:
+- Spring Security debug logs show authentication flow
+- OAuth2 debug logs show token exchange process
 
-- [Spring Security OAuth2 Documentation](https://docs.spring.io/spring-security/reference/servlet/oauth2/index.html)
-- [Keycloak Documentation](https://www.keycloak.org/documentation)
-- [Thymeleaf Documentation](https://www.thymeleaf.org/documentation.html)
+## Next Steps
 
-## 🤝 Contributing
+To enhance this application, consider:
+- Adding role-based authorization
+- Implementing API endpoints with JWT validation
+- Adding user profile management
+- Integrating with a database
+- Adding more sophisticated UI styling
+- Implementing proper error handling
+- Adding unit and integration tests
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+## Related Projects
 
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is part of a Spring Security learning series that includes:
+- `basic-auth`: Basic authentication demo
+- `microservice-oauth2`: Microservices with OAuth2
