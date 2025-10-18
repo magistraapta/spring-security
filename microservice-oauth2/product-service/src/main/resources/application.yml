@@ -1,0 +1,13 @@
+server:
+    port: 8082
+
+spring:
+    application:
+        name: product-service
+
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    issuer-uri: http://localhost:8080/realms/spring-oauth2
+                    jwk-set-uri: http://localhost:8080/realms/spring-oauth2/protocol/openid-connect/certs
